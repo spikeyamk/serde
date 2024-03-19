@@ -27,19 +27,38 @@ target_link_libraries(${PROJECT_NAME} INTERFACE
 option(SERDE_TEST "Enable Serde Tests" OFF)
 
 if(SERDE_TEST)
-	add_executable("${PROJECT_NAME}_tests_object_super"
-		tests/object_super.cpp
+	enable_testing()
+
+	add_library("${PROJECT_NAME}_tests" STATIC
+		tests/tests.cpp
 	)
 
+	target_link_libraries("${PROJECT_NAME}_tests" PRIVATE serde)
+	target_include_directories("${PROJECT_NAME}_tests" INTERFACE include)
+
 	if(WIN32)
-		target_compile_definitions("${PROJECT_NAME}_tests_object_super" PRIVATE _WIN32_WINNT=0x0A00)
+		target_compile_definitions("${PROJECT_NAME}_tests" PRIVATE _WIN32_WINNT=0x0A00)
 	endif()
 
-	target_link_libraries("${PROJECT_NAME}_tests_object_super" PRIVATE
-		serde
-	)	
+	function(serde_add_test SERDE_TEST_NAME)
+		add_executable("${PROJECT_NAME}_tests_${SERDE_TEST_NAME}"
+			"tests/${SERDE_TEST_NAME}.cpp"
+		)
 
-	enable_testing()
-	add_test(NAME Serde::Tests::object_super
-             COMMAND "${PROJECT_NAME}_tests_object_super")
+		if(WIN32)
+			target_compile_definitions("${PROJECT_NAME}_tests_${SERDE_TEST_NAME}" PRIVATE _WIN32_WINNT=0x0A00)
+		endif()
+
+		target_link_libraries("${PROJECT_NAME}_tests_${SERDE_TEST_NAME}" PRIVATE
+			"${PROJECT_NAME}_tests"
+		)	
+
+		add_test(
+			NAME "Serde::Tests::${SERDE_TEST_NAME}"
+			COMMAND "${PROJECT_NAME}_tests_${SERDE_TEST_NAME}"
+		)
+	endfunction()
+
+	serde_add_test(object_super)
+	serde_add_test(object_super_iterable)
 endif()

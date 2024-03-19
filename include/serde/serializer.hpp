@@ -9,6 +9,7 @@ namespace Serde {
 	class Serializer {
 	private:
 		template<typename T, const size_t obj_size, const size_t obj_i, const size_t ser_size, const size_t ser_i>
+		requires std::is_scalar_v<std::remove_reference_t<decltype(boost::pfr::get<obj_i>(T{}))>>
 		static void p_inner_serialize(const T& obj, std::array<uint8_t, ser_size>& ret) {
 			constexpr size_t ser_inc { sizeof(std::remove_reference<decltype(boost::pfr::get<obj_i>(obj))>::type) };
 
@@ -29,6 +30,42 @@ namespace Serde {
 					);
 				}
 			);
+
+			if constexpr(obj_i + 1 < obj_size) {
+				p_inner_serialize<T, obj_size, obj_i + 1, ser_size, ser_i + ser_inc>(obj, ret);
+			}
+		}
+
+		template<typename T, const size_t obj_size, const size_t obj_i, const size_t ser_size, const size_t ser_i>
+		requires is_iterable_v<std::remove_reference_t<decltype(boost::pfr::get<obj_i>(T{}))>>
+		static void p_inner_serialize(const T& obj, std::array<uint8_t, ser_size>& ret) {
+			constexpr size_t ser_inc { sizeof(std::remove_reference<decltype(boost::pfr::get<obj_i>(obj))>::type) };
+
+			size_t tmp_ser_i { ser_i };
+
+			for(const auto e: boost::pfr::get<obj_i>(obj)) {
+				static_assert(std::is_scalar_v<decltype(e)>, "Iterable must be of scalar value_type");
+
+				std::generate(
+					ret.begin() + tmp_ser_i,
+					ret.begin() + tmp_ser_i + sizeof(e),
+					[
+						index = static_cast<size_t>(0),
+						obj_mem = static_cast<const int64_t*>(
+							static_cast<const void*>(
+								&e
+							)
+						)
+					]() mutable {
+						return static_cast<uint8_t>(
+							(*obj_mem >> (index++ * 8))
+							& 0xFF
+						);
+					}
+				);
+
+				tmp_ser_i += sizeof(e);
+			}
 
 			if constexpr(obj_i + 1 < obj_size) {
 				p_inner_serialize<T, obj_size, obj_i + 1, ser_size, ser_i + ser_inc>(obj, ret);

@@ -19,7 +19,7 @@ namespace Serde {
 
     template<typename T, const size_t obj_size, const size_t obj_i>
     constexpr void inner_get_serialized_size(const T& obj, size_t& ret) {
-        ret += sizeof(std::remove_reference<decltype(boost::pfr::get<obj_i>(obj))>::type);
+        ret += sizeof(std::remove_reference_t<decltype(boost::pfr::get<obj_i>(obj))>);
         if constexpr(obj_i + 1 < obj_size) {
             inner_get_serialized_size<T, obj_size, obj_i + 1>(obj, ret);
         }
@@ -33,4 +33,16 @@ namespace Serde {
         inner_get_serialized_size<T, decltype(boost::pfr::detail::tie_as_tuple(obj))::size_v, 0>(obj, ret);
         return ret + 1;
     }
+
+    template<typename T, typename = void>
+    struct is_iterable : std::false_type {};
+
+    template<typename T>
+    struct is_iterable<T, std::void_t<decltype(std::begin(std::declval<T&>())),
+                                    decltype(std::end(std::declval<T&>()))
+                                    >
+                    > : std::true_type {};
+
+    template<typename T>
+    constexpr bool is_iterable_v = is_iterable<T>::value;
 }
