@@ -23,12 +23,6 @@ namespace Serde {
                 return false;
             }
         }
-
-        template<typename ... Args>
-        struct pack_holder {
-            template <template < typename ... > typename apply_to_T>
-            using apply_to = apply_to_T<Args...>;
-        };
     }
 
     namespace Tests {

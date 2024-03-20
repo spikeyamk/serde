@@ -45,4 +45,10 @@ namespace Serde {
 
     template<typename T>
     constexpr bool is_iterable_v = is_iterable<T>::value;
+
+    template<typename ... Args>
+    struct pack_holder {
+        template <template < typename ... > typename apply_to_T>
+        using apply_to = apply_to_T<Args...>;
+    };
 }
