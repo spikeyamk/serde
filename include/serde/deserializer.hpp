@@ -34,7 +34,14 @@ namespace Serde {
 		}
 
 		template<typename T>
-		static T p_deserialize(const std::array<uint8_t, get_serialized_size<T>()>& ser) {
+		static T p_deserialize(const std::array<uint8_t, get_serialized_size<T>()>& ser)
+		requires std::is_empty_v<T> {
+			return T{};
+		}
+
+		template<typename T>
+		static T p_deserialize(const std::array<uint8_t, get_serialized_size<T>()>& ser)
+		requires !std::is_empty_v<T> {
 			T ret {};
 			p_inner_deserialize<T, decltype(boost::pfr::detail::tie_as_tuple(ret))::size_v, 0, get_serialized_size<T>(), 1>(ser, ret);
 			return ret;
@@ -43,7 +50,6 @@ namespace Serde {
 		constexpr Deserializer() {
 			static_assert((sizeof...(Args) < std::numeric_limits<uint8_t>::max()), "Too many arguments");
 		}
-
 
 		template<typename T, const size_t N>
 		static T run(const std::array<uint8_t, N>& ser) {

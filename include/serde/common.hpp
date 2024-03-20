@@ -26,7 +26,14 @@ namespace Serde {
     }
 
     template<typename T>
-    constexpr size_t get_serialized_size() {
+    constexpr size_t get_serialized_size()
+    requires std::is_empty_v<T> {
+        return 1;
+    }
+
+    template<typename T>
+    constexpr size_t get_serialized_size()
+	requires !std::is_empty_v<T> {
         T obj{};
         static_assert(decltype(boost::pfr::detail::tie_as_tuple(obj))::size_v != 0, "const T& obj must not be empty");
         size_t ret { 0 };

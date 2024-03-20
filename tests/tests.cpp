@@ -12,11 +12,6 @@ namespace Serde {
             const auto ser { T_Serializer::run(obj) };
             const auto de { T_Deserializer::run<T>(ser) };
 
-            std::cout
-                << "typeid(T).name(): "
-                << typeid(T).name()
-                << std::endl;
-
             if(boost::pfr::eq(obj, de)) {
                 return true;
             } else {
@@ -96,18 +91,13 @@ namespace Serde {
             std::array<uint8_t, 12> inner;
         };
 
+        const Iterable iterable {
+            .inner = { Iterable::make_array(std::make_integer_sequence<uint8_t, sizeof(Iterable::inner)>()) }
+        };
     }
 
     namespace Tests {
         int object_super_iterable() {
-            const Iterable iterable {
-                .inner = { Iterable::make_array(std::make_integer_sequence<uint8_t, sizeof(Iterable::inner)>()) }
-            };
-
-            std::printf("sizeof(Object): %zu\n", sizeof(Object));
-            std::printf("sizeof(Super): %zu\n", sizeof(Super));
-            std::printf("sizeof(Iterable): %zu\n", sizeof(Iterable));
-
             using ObjectSuperIterablePack = pack_holder<Object, Super, Iterable>;
             using ObjectSuperIterableSerializer = ObjectSuperIterablePack::apply_to<Serde::Serializer>;
             using ObjectSuperIterableDeserializer = ObjectSuperIterablePack::apply_to<Serde::Deserializer>;
@@ -122,6 +112,37 @@ namespace Serde {
 
             if(run<ObjectSuperIterableSerializer, ObjectSuperIterableDeserializer>(iterable) == false) {
                 return -3;
+            }
+
+            return 0;
+        }
+    }
+    
+    namespace Tests {
+        struct Empty {};
+        const Empty empty {};
+    }
+
+    namespace Tests {
+        int object_super_iterable_empty() {
+            using ObjectSuperIterableEmptyPack = pack_holder<Object, Super, Iterable, Empty>;
+            using ObjectSuperIterableEmptySerializer = ObjectSuperIterableEmptyPack::apply_to<Serde::Serializer>;
+            using ObjectSuperIterableEmptyDeserializer = ObjectSuperIterableEmptyPack::apply_to<Serde::Deserializer>;
+
+            if(run<ObjectSuperIterableEmptySerializer, ObjectSuperIterableEmptyDeserializer>(object) == false) {
+                return -1;
+            }
+
+            if(run<ObjectSuperIterableEmptySerializer, ObjectSuperIterableEmptyDeserializer>(super) == false) {
+                return -2;
+            }
+
+            if(run<ObjectSuperIterableEmptySerializer, ObjectSuperIterableEmptyDeserializer>(iterable) == false) {
+                return -3;
+            }
+
+            if(run<ObjectSuperIterableEmptySerializer, ObjectSuperIterableEmptyDeserializer>(empty) == false) {
+                return -4;
             }
 
             return 0;

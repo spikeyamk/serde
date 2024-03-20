@@ -61,4 +61,5 @@ if(SERDE_TEST)
 
 	serde_add_test(object_super)
 	serde_add_test(object_super_iterable)
+	serde_add_test(object_super_iterable_empty)
 endif()

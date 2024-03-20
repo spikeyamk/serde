@@ -74,10 +74,18 @@ namespace Serde {
 		}
 
 		template<typename T>
-		static std::array<uint8_t, get_serialized_size<T>()> p_serialize(const T& obj) {
+		static std::array<uint8_t, get_serialized_size<T>()> p_serialize(const T& obj)
+		requires !std::is_empty_v<T> {
 			static_assert(decltype(boost::pfr::detail::tie_as_tuple(obj))::size_v != 0, "const T& obj must not be empty");
 			std::array<uint8_t, get_serialized_size<T>()> ret { static_cast<uint8_t>(get_index<T, Args...>()) };
 			p_inner_serialize<T, decltype(boost::pfr::detail::tie_as_tuple(obj))::size_v, 0, get_serialized_size<T>(), 1>(obj, ret);
+			return ret;
+		}
+
+		template<typename T>
+		static std::array<uint8_t, get_serialized_size<T>()> p_serialize(const T& obj)
+		requires std::is_empty_v<T> {
+			std::array<uint8_t, get_serialized_size<T>()> ret { static_cast<uint8_t>(get_index<T, Args...>()) };
 			return ret;
 		}
 	public:
