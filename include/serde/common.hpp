@@ -4,7 +4,7 @@
 
 namespace Serde {
     template<typename T, const size_t index, typename HeadArg, typename ... TailArgs>
-    constexpr size_t inner_get_index() {
+    consteval size_t inner_get_index() {
         if constexpr(std::is_same_v<T, HeadArg>) {
             return index;
         } else {
@@ -13,12 +13,12 @@ namespace Serde {
     }
 
     template<typename T, typename ... Args>
-    constexpr size_t get_index() {
+    consteval size_t get_index() {
         return inner_get_index<T, 0, Args...>();
     }
 
     template<typename T, const size_t obj_size, const size_t obj_i>
-    constexpr void inner_get_serialized_size(const T& obj, size_t& ret) {
+    consteval void inner_get_serialized_size(const T& obj, size_t& ret) {
         ret += sizeof(std::remove_reference_t<decltype(boost::pfr::get<obj_i>(obj))>);
         if constexpr(obj_i + 1 < obj_size) {
             inner_get_serialized_size<T, obj_size, obj_i + 1>(obj, ret);
@@ -26,13 +26,13 @@ namespace Serde {
     }
 
     template<typename T>
-    constexpr size_t get_serialized_size()
+    consteval size_t get_serialized_size()
     requires std::is_empty_v<T> {
         return 1;
     }
 
     template<typename T>
-    constexpr size_t get_serialized_size()
+    consteval size_t get_serialized_size()
 	requires (!std::is_empty_v<T>) {
         T obj{};
         static_assert(decltype(boost::pfr::detail::tie_as_tuple(obj))::size_v != 0, "const T& obj must not be empty");
