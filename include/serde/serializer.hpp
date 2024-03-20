@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <limits>
 
 #include "serde/common.hpp"
 
@@ -11,7 +12,7 @@ namespace Serde {
 		template<typename T, const size_t obj_size, const size_t obj_i, const size_t ser_size, const size_t ser_i>
 		requires std::is_scalar_v<std::remove_reference_t<decltype(boost::pfr::get<obj_i>(T{}))>>
 		static void p_inner_serialize(const T& obj, std::array<uint8_t, ser_size>& ret) {
-			constexpr size_t ser_inc { sizeof(std::remove_reference<decltype(boost::pfr::get<obj_i>(obj))>::type) };
+			constexpr size_t ser_inc { sizeof(std::remove_reference_t<decltype(boost::pfr::get<obj_i>(obj))>) };
 
 			std::generate(
 				ret.begin() + ser_i,
@@ -39,7 +40,7 @@ namespace Serde {
 		template<typename T, const size_t obj_size, const size_t obj_i, const size_t ser_size, const size_t ser_i>
 		requires is_iterable_v<std::remove_reference_t<decltype(boost::pfr::get<obj_i>(T{}))>>
 		static void p_inner_serialize(const T& obj, std::array<uint8_t, ser_size>& ret) {
-			constexpr size_t ser_inc { sizeof(std::remove_reference<decltype(boost::pfr::get<obj_i>(obj))>::type) };
+			constexpr size_t ser_inc { sizeof(std::remove_reference_t<decltype(boost::pfr::get<obj_i>(obj))>) };
 
 			size_t tmp_ser_i { ser_i };
 

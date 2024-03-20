@@ -10,8 +10,12 @@ namespace Serde {
         template<typename T_Serializer, typename T_Deserializer, typename T>
         bool run(const T& obj) {
             const auto ser { T_Serializer::run(obj) };
-            std::printf("sizeof(ser): %zu\n", sizeof(ser));
-            const auto de { T_Deserializer::run<T>(ser) };
+            const auto de { T_Serializer::run<T>(ser) };
+
+            std::cout
+                << "typeid(T).name(): "
+                << typeid(T).name()
+                << std::endl;
 
             if(boost::pfr::eq(obj, de)) {
                 return true;
