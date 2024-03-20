@@ -1,5 +1,9 @@
 #pragma once
 
+#include <variant>
+#include <cassert>
+#include <cstdint>
+
 #include <boost/pfr.hpp>
 
 namespace Serde {
@@ -57,5 +61,24 @@ namespace Serde {
     struct pack_holder {
         template <template < typename, typename ... > typename apply_to_T>
         using apply_to = apply_to_T<Args...>;
+        using Variant = std::variant<Args...>;
+    private:
+        template<typename HeadArg, typename ... TailArgs>
+        static Variant inner_decode(const uint8_t index) {
+            if constexpr(sizeof...(TailArgs) != 0) {
+                if(index == (sizeof...(Args) - sizeof...(TailArgs) - 1)) {
+                    return Variant { HeadArg {} };
+                } else {
+                    return inner_decode<TailArgs...>(index);
+                }
+            } else {
+                return Variant { HeadArg {} };
+            }
+        }
+    public:
+        static Variant decode(const uint8_t index) {
+            assert(index < sizeof...(Args));
+            return inner_decode<Args...>(index);
+        }
     };
 }
