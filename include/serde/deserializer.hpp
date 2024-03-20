@@ -41,7 +41,7 @@ namespace Serde {
 
 		template<typename T>
 		static T p_deserialize(const std::array<uint8_t, get_serialized_size<T>()>& ser)
-		requires !std::is_empty_v<T> {
+		requires (!std::is_empty_v<T>) {
 			T ret {};
 			p_inner_deserialize<T, decltype(boost::pfr::detail::tie_as_tuple(ret))::size_v, 0, get_serialized_size<T>(), 1>(ser, ret);
 			return ret;
