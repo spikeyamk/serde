@@ -10,7 +10,7 @@ namespace Serde {
         template<typename T_Serializer, typename T_Deserializer, typename T>
         bool run(const T& obj) {
             const auto ser { T_Serializer::run(obj) };
-            const auto de { T_Serializer::run<T>(ser) };
+            const auto de { T_Deserializer::run<T>(ser) };
 
             std::cout
                 << "typeid(T).name(): "

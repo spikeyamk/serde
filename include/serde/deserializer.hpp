@@ -45,27 +45,15 @@ namespace Serde {
 		}
 
 
-			/*
-		template<
-			typename T
-			//,const size_t N
-			//,typename T_Array
-		>
-		static T run(
-			//const std::array<uint8_t, N>
-			//const T_Array& ser
-		) {
+		template<typename T, const size_t N>
+		static T run(const std::array<uint8_t, N>& ser) {
 			static_assert((std::is_same_v<T, Args> || ...), "Serde::run: typename T must be member of parameter pack typename ... Args");
-			static_assert((sizeof(T_Array) == get_serialized_size<T>()), "Serde::run: const std::array<uint8_t, N>& ser argument of wrong size must be equal to get_serialized_size<T>()");
+			static_assert((N == get_serialized_size<T>()), "Serde::run: const std::array<uint8_t, N>& ser argument of wrong size must be equal to get_serialized_size<T>()");
 			if(ser[0] != get_index<T, Args...>()) {
 				std::cerr << "Serde::run: const std::array<uint8_t, N>& ser has wrong header must be ser[0] == get_index<T>()" << std::endl;
 				std::abort();
 			}
 			return p_deserialize<T>(ser);
-			return T{};
 		}
-			*/
-		template<typename T>
-		static void run() {}
 	};
 }
