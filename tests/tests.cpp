@@ -7,16 +7,52 @@
 
 namespace Serde {
     namespace Tests {
+        template<typename T, typename ... Args>
+        constexpr bool test_variant(const std::variant<Args...>& variant) {
+            bool ret { false };
+            std::visit([&ret](auto&& e) {
+                if constexpr(std::is_same_v<T, std::decay_t<decltype(e)>>) {
+                    ret = true;
+                }
+            }, variant);
+            return ret;
+        }
+
         template<typename T_Serializer, typename T_Deserializer, typename T>
         bool run(const T& obj) {
             const auto ser { T_Serializer::run(obj) };
             const auto de { T_Deserializer::run<T>(ser) };
 
-            if(boost::pfr::eq(obj, de)) {
-                return true;
-            } else {
+            if(boost::pfr::eq(obj, de) == false) {
                 return false;
             }
+            
+            const auto decoded { T_Deserializer::decode(ser) };
+            if(decoded.has_value() == false) {
+                return false;
+            }
+
+            if(test_variant<T>(decoded.value()) == false) {
+                return false;
+            }
+
+            if(
+                [&obj, &decoded]() {
+                    bool ret { false };
+                    std::visit([&ret, &obj](auto&& e) {
+                        if constexpr(std::is_same_v<std::decay_t<decltype(e)>, T>) {
+                            if(boost::pfr::eq(obj, e)) {
+                                ret = true;
+                            }
+                        }
+                    }, decoded.value());
+                    return ret;
+                }()
+            == false) {
+                return false;
+            }
+
+            return true;
         }
     }
 
