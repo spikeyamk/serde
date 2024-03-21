@@ -25,7 +25,6 @@ target_link_libraries(${PROJECT_NAME} INTERFACE
 )
 
 option(SERDE_TEST "Enable Serde Tests" OFF)
-set(SERDE_TEST ON)
 
 if(SERDE_TEST)
 	enable_testing()
