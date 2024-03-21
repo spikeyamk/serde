@@ -91,5 +91,26 @@ namespace Serde {
 			}, inner_decode<Args...>(index));
 			return ret;
         }
+
+		template<typename Iter>
+		static std::optional<Variant> decode(const Iter& begin, const Iter& end) {
+			static_assert(std::is_same_v<Iter::value_type, uint8_t>, "Serde::Deserializer::decode: typename Iter must have Iter::value_type == uint8_t");
+			const uint8_t index { *begin };
+			if(index >= sizeof...(Args)) {
+				return std::nullopt;
+			}
+
+			std::optional<Variant> ret;
+			std::visit([&ret, &begin, &end](auto&& e) {
+				std::array<uint8_t, get_serialized_size<std::decay_t<decltype(e)>>()> ser;
+				if(std::distance(begin, end) != std::distance(ser.begin(), ser.end())) {
+					ret = std::nullopt;
+					return;
+				}
+				std::copy(begin, end, ser.begin());
+            	ret = run<std::decay_t<decltype(e)>>(ser);
+			}, inner_decode<Args...>(index));
+			return ret;
+        }
 	};
 }

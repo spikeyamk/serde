@@ -52,6 +52,32 @@ namespace Serde {
                 return false;
             }
 
+            const auto decoded_by_it { T_Deserializer::decode(ser.begin(), ser.end()) };
+
+            if(decoded_by_it.has_value() == false) {
+                return false;
+            }
+
+            if(test_variant<T>(decoded_by_it.value()) == false) {
+                return false;
+            }
+
+            if(
+                [&obj, &decoded_by_it]() {
+                    bool ret { false };
+                    std::visit([&ret, &obj](auto&& e) {
+                        if constexpr(std::is_same_v<std::decay_t<decltype(e)>, T>) {
+                            if(boost::pfr::eq(obj, e)) {
+                                ret = true;
+                            }
+                        }
+                    }, decoded_by_it.value());
+                    return ret;
+                }()
+            == false) {
+                return false;
+            }
+
             return true;
         }
     }
@@ -101,6 +127,8 @@ namespace Serde {
 
     namespace Tests {
         int object_super() {
+            std::array<uint8_t, 12> array;
+            const auto array_begin { array.begin() };
             using ObjectSuperPack = pack_holder<Object, Super>;
             using ObjectSuperSerializer = ObjectSuperPack::apply_to<Serde::Serializer>;
             using ObjectSuperDeserializer = ObjectSuperPack::apply_to<Serde::Deserializer>;
