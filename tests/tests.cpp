@@ -52,7 +52,7 @@ namespace Serde {
                 return false;
             }
 
-            const auto decoded_by_it { T_Deserializer::decode(ser.begin(), ser.end()) };
+            const auto decoded_by_it { T_Deserializer::decode(ser.cbegin(), ser.cend()) };
 
             if(decoded_by_it.has_value() == false) {
                 return false;

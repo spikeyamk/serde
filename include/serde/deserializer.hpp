@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <optional>
+#include <iterator>
 
 #include "serde/common.hpp"
 
@@ -93,8 +94,8 @@ namespace Serde {
         }
 
 		template<typename Iter>
-		static std::optional<Variant> decode(const Iter& begin, const Iter& end) {
-			static_assert(std::is_same_v<Iter::value_type, uint8_t>, "Serde::Deserializer::decode: typename Iter must have Iter::value_type == uint8_t");
+		static std::optional<Variant> decode(const Iter& begin, const Iter& end)
+		requires std::is_same_v<typename std::iterator_traits<Iter>::value_type, uint8_t> {
 			const uint8_t index { *begin };
 			if(index >= sizeof...(Args)) {
 				return std::nullopt;
