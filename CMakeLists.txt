@@ -9,9 +9,12 @@ if(WIN32)
 	set(Boost_USE_STATIC_RUNTIME ON)
 	set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDebug)
 endif()
-set(Boost_USE_STATIC_LIBS    ON)
-set(Boost_USE_MULTITHREADED  ON)
-find_package(Boost)
+
+if(NOT BOOST_FOUND)
+    set(Boost_USE_STATIC_LIBS    ON)
+    set(Boost_USE_MULTITHREADED  ON)
+    find_package(Boost)
+endif()
 
 add_library(${PROJECT_NAME} INTERFACE)
 
