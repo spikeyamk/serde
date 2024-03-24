@@ -38,6 +38,7 @@ namespace Serde {
 		template<typename T, const size_t N>
 		static T p_deserialize(const std::array<uint8_t, N>& ser)
 		requires std::is_empty_v<T> {
+            (void) ser;
 			return T{};
 		}
 

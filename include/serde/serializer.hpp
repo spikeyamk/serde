@@ -85,6 +85,7 @@ namespace Serde {
 		template<typename T>
 		static std::array<uint8_t, get_serialized_size<T>()> p_serialize(const T& obj)
 		requires std::is_empty_v<T> {
+            (void) obj;
 			std::array<uint8_t, get_serialized_size<T>()> ret { static_cast<uint8_t>(get_index<T, Args...>()) };
 			return ret;
 		}
