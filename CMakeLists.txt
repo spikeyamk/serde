@@ -4,27 +4,10 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_BUILD_TYPE Debug)
 
-if(WIN32)
-	set(Boost_NO_SYSTEM_PATHS    ON)
-	set(Boost_USE_STATIC_RUNTIME ON)
-	set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDebug)
-endif()
-
-if(NOT BOOST_FOUND)
-    set(Boost_USE_STATIC_LIBS    ON)
-    set(Boost_USE_MULTITHREADED  ON)
-    find_package(Boost)
-endif()
-
 add_library(${PROJECT_NAME} INTERFACE)
 
 target_include_directories(${PROJECT_NAME} INTERFACE
     "include"
-    ${Boost_INCLUDE_DIRS}
-)
-
-target_link_libraries(${PROJECT_NAME} INTERFACE
-    ${Boost_LIBRARIES}
 )
 
 option(SERDE_TEST "Enable Serde Tests" OFF)
