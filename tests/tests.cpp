@@ -1,5 +1,6 @@
 #include <array>
 
+#include "serde/common.hpp"
 #include "serde/serializer.hpp"
 #include "serde/deserializer.hpp"
 
@@ -124,6 +125,11 @@ namespace Serde {
             .b = Enum::Second
         };
     }
+
+    template<typename ... Args>
+    struct Test {
+
+    };
 
     namespace Tests {
         int object_super() {
