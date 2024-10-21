@@ -10,13 +10,31 @@ target_include_directories(${PROJECT_NAME} INTERFACE
     "include"
 )
 
-option(SERDE_TEST "Enable Serde Tests" OFF)
+if(NOT TARGET Boost::pfr)
+	message(STATUS "Boost.PFR missing target")
+	find_package(Boost 1.84.0)
+	if(Boost_FOUND)
+		target_include_directories(${PROJECT_NAME} INTERFACE ${Boost_INCLUDE_DIRS})
+	else()
+		message(STATUS "Using FetchContent Boost.PFR GIT_TAG: boost-1.86.0!")
+		include(FetchContent)
+		FetchContent_Declare(
+			boost_pfr
+			GIT_REPOSITORY https://github.com/boostorg/pfr.git
+			GIT_TAG        boost-1.86.0
+		)
+		FetchContent_MakeAvailable(boost_pfr)
+		target_link_libraries(${PROJECT_NAME} INTERFACE Boost::pfr)
+	endif()
+else()
+	target_link_libraries(${PROJECT_NAME} INTERFACE Boost::pfr)
+endif()
 
+option(SERDE_TEST "Enable Serde Tests" OFF)
 if(SERDE_TEST)
 	enable_testing()
-
 	add_library("${PROJECT_NAME}_tests" STATIC
-		tests/tests.cpp
+		test/tests.cpp
 	)
 
 	target_link_libraries("${PROJECT_NAME}_tests" PRIVATE serde)
@@ -28,7 +46,7 @@ if(SERDE_TEST)
 
 	function(serde_add_test SERDE_TEST_NAME)
 		add_executable("${PROJECT_NAME}_tests_${SERDE_TEST_NAME}"
-			"tests/${SERDE_TEST_NAME}.cpp"
+			"test/${SERDE_TEST_NAME}.cpp"
 		)
 
 		if(WIN32)
