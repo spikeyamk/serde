@@ -3,6 +3,7 @@
 #include <variant>
 #include <cassert>
 #include <cstdint>
+#include <type_traits>
 
 #include <boost/pfr.hpp>
 
@@ -62,4 +63,21 @@ namespace Serde {
         template <template < typename ... > typename apply_to_T>
         using apply_to = apply_to_T<Args...>;
     };
+
+    template<typename T> 
+    struct uint_equivalent {
+        using type = std::conditional_t<
+            sizeof(T) == 1, uint8_t,
+            std::conditional_t<
+                sizeof(T) == 2, uint16_t,
+                std::conditional_t<
+                    sizeof(T) == 4, uint32_t,
+                    uint64_t
+                >
+            >
+        >;
+    };
+
+    template<typename T>
+    using uint_equivalent_t = uint_equivalent<T>::type;
 }
