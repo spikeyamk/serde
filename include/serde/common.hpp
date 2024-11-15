@@ -64,26 +64,21 @@ namespace Serde {
         template <template < typename ... > typename apply_to_T>
         using apply_to = apply_to_T<Args...>;
     private:
-        template<size_t max_before, typename Last>
+        template<size_t max_before>
         static constexpr size_t max_size() {
-            if constexpr(get_serialized_size<Last>() > max_before) {
-                return get_serialized_size<Last>();
-            } else {
-                return max_before;
-            }
+            return max_before;
         }
 
         template<size_t max_before, typename First, typename ... Rest>
         static constexpr size_t max_size() {
             if constexpr(get_serialized_size<First>() > max_before) {
                 return max_size<get_serialized_size<First>(), Rest...>();
-            } else {
-                return max_size<max_before, Rest...>();
             }
+            return max_size<max_before, Rest...>();
         }
     public:
         static constexpr size_t max_size() {
-            return max_size<Args...>();
+            return max_size<0, Args...>();
         }
     };
 
