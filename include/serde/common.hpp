@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdint>
 #include <type_traits>
+#include <algorithm>
 
 #include <boost/pfr.hpp>
 
@@ -71,10 +72,7 @@ namespace Serde {
 
         template<size_t max_before, typename First, typename ... Rest>
         static constexpr size_t max_size() {
-            if constexpr(get_serialized_size<First>() > max_before) {
-                return max_size<get_serialized_size<First>(), Rest...>();
-            }
-            return max_size<max_before, Rest...>();
+            return max_size<std::max(max_before, get_serialized_size<First>()), Rest...>();
         }
     public:
         static constexpr size_t max_size() {
